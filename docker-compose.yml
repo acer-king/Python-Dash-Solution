@@ -1,0 +1,58 @@
+version: '3'
+services:
+  influxdb:
+    image: influxdb:2.0.6
+    container_name: influxdb
+    restart: always
+    ports: 
+      - 8086:8086
+    networks: 
+      - default_network
+    volumes: 
+      - $PWD/data:/var/lib/influxdb2
+      - $PWD/config:/etc/influxdb2
+    environment: 
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=acer
+      - DOCKER_INFLUXDB_INIT_PASSWORD=acerking1
+      - DOCKER_INFLUXDB_INIT_ORG=IT
+      - DOCKER_INFLUXDB_INIT_BUCKET=acer
+  etl:
+    build: .
+    container_name: etl
+    image: 1991412/dastan:etl
+    links:
+      - influxdb
+    ports: 
+      - 8050:8050
+    volumes: 
+      - $PWD/config:/usr/local/config
+      - $PWD/plot.py:/usr/local/plot.py
+    networks: 
+      - default_network
+    depends_on: 
+      - influxdb
+    environment: 
+      - HOST=0.0.0.0
+      - PORT=8050
+  cron:
+    build: # "context" and "dockerfile" fields have to be under "build"
+      context: .
+      dockerfile: cron/Dockerfile
+    container_name: cron
+    image: 1991412/dastan:cron
+    links:
+      - influxdb
+    volumes: 
+      - $PWD/datasource:/usr/local/datasource
+      - $PWD/config:/usr/local/config
+      - $PWD/cron.py:/usr/local/cron.py
+    networks: 
+      - default_network
+    depends_on: 
+      - influxdb
+    
+networks: 
+  default_network:
+volumes: 
+  influxdb_data:

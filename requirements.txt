@@ -1,1 +1,4 @@
-influxdb
+influxdb-client[extra]
+dash
+python-dotenv
+pandas

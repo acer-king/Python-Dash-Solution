@@ -1,25 +1,37 @@
 import unittest
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
+from datetime import datetime
+import configparser
+from dotenv import load_dotenv
+from dotenv import dotenv_values
+import os
+from datetime import datetime, timedelta
 
 
 class TestStringMethods(unittest.TestCase):
 
     def test_connection(self):
-        self.client = InfluxDBClient(host='ec2-18-116-234-142.us-east-2.compute.amazonaws.com',
-                                     port=8086, username='dauren', password='acer-king1991412', path="influxdb")
-        self.client.create_database("test")
-        pass
+        # You can generate a Token from the "Tokens Tab" in the UI
 
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
+        # using Http
+        read_config = configparser.ConfigParser()
+        read_config.read("config/influx-configs")
+        url = (read_config.get("default", "url")).strip('"')
+        self.client = InfluxDBClient(
+            url=url, token=read_config.get("default", "token"), org=read_config.get("default", "org"), verify_ssl=False, timeout=6000, ssl=False)
+        status = self.client.ready()
+        # dbs = client.get_list_users()
+        self.assertTrue(status.status == "ready")
 
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
+    def test_env(self):
+        load_dotenv()
+        bucketname = os.getenv('bucketname')
+        self.assertTrue(bucketname == 'acer')
+
+    def test_test(self):
+        x = 1257894000123456000
+        print(type(x))
 
 
 if __name__ == '__main__':
