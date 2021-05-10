@@ -37,7 +37,14 @@ def connect_db():
     # connect to database
     global client
     read_config = configparser.ConfigParser()
-    read_config.read("config/influx-configs")
+    while True:
+        try:
+            read_config.read("config/influx-configs")
+            break
+        except Exception as err:
+            time.sleep(3)
+            pass
+    
     url = (read_config.get("default", "url")).strip(
         '"').replace('localhost', 'influxdb')
     while True:
