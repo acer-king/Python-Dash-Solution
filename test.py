@@ -39,4 +39,3 @@ if __name__ == '__main__':
     # small4
     # small 9
     # small 10
-1
