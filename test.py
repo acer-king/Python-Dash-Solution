@@ -38,3 +38,4 @@ if __name__ == '__main__':
     unittest.main()
     # small4
     # small5
+    # samll6
